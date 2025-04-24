@@ -1,0 +1,53 @@
+- name: Install ELK Fleet
+  hosts: all
+  become: yes
+  # vars_files:
+  # - ELK_secret.yml
+  
+  tasks:
+    - name: Download Elastic Agent
+      ansible.builtin.get_url:
+        url: https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-linux-x86_64.tar.gz
+        dest: /tmp/elastic-agent-9.0.0-linux-x86_64.tar.gz
+        mode: '0644'
+
+    - name: Extract Elastic Agent archive
+      ansible.builtin.unarchive:
+        src: /tmp/elastic-agent-9.0.0-linux-x86_64.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Install Elastic Agent
+      ansible.builtin.command:
+        cmd: ./elastic-agent install --fleet-server-es=http://192.168.1.46:9200 --fleet-server-service-token=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE3NDU0MTk5MDY1NTc6NlRycktjUEZTWnFScTNweXNnNE9yZw --fleet-server-policy=fleet-server-policy --fleet-server-port=8220 --install-servers --non-interactive --force
+        chdir: /tmp
+      register: install_output
+      ignore_errors: no  # optionnel, selon le niveau de tolérance que tu veux
+
+    - name: Afficher la sortie de l'install
+      ansible.builtin.debug:
+        msg: "{{ install_output.stdout }}"
+
+    - name: Clean up Elastic Agent tarball
+      ansible.builtin.file:
+        path: /tmp/elastic-agent-9.0.0-linux-x86_64.tar.gz
+        state: absent
+
+    - name: Clean up extracted Elastic Agent directory
+      ansible.builtin.file:
+        path: /tmp/elastic-agent-9.0.0-linux-x86_64
+        state: absent
+
+    - name: Waiting for launching
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Install Elastic Agent
+      ansible.builtin.command:
+        cmd: /usr/bin/elastic-agent status
+      register: install_status
+      ignore_errors: yes 
+
+    - name: Install terminée
+      ansible.builtin.debug:
+        msg: "{{ install_status.stdout }}"

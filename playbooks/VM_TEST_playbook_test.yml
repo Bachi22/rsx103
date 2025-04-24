@@ -1,0 +1,12 @@
+---
+- name: Echo test sur VM_test
+  hosts: VM_test
+  become: false
+  tasks:
+    - name: Exécuter un echo
+      ansible.builtin.shell: echo "Hello depuis Ansible sur {{ inventory_hostname }}" | hostname
+      register: test
+
+    - name: Afficher la sortie du echo
+      ansible.builtin.debug:
+        msg: "{{ test.stdout }}"
