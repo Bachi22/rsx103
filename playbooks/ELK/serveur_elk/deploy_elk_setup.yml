@@ -27,6 +27,12 @@
         dest: /opt/docker-elk/kibana/config/kibana.yml
         mode: '0644'
 
+    - name: Copier le .env custom
+      template:
+        src: env.j2
+        dest: /opt/docker-elk/.env
+        mode: '0644'
+
     - name: Copier le fleet-compose.yml custom
       copy:
         src: fleet-compose.yml
@@ -52,3 +58,11 @@
     - name: Afficher la sortie de l'installation
       debug:
         msg: "{{ launch_output.stdout }}"
+
+    - name: Is everything is working?
+      command: docker ps
+      register: verif_output
+
+    - name: Afficher la sortie de l'installation
+      debug:
+        msg: "{{ verif_output.stdout }}"
