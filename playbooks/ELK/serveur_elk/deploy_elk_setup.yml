@@ -7,6 +7,10 @@
     - elk_ip.yml
 
   tasks:
+    - name: Afficher la valeur de ip_addr
+      debug:
+        msg: "L'adresse IP utilisée est : {{ ip_addr }}"
+
     - name: Cloner le dépôt docker-elk
       git:
         repo: https://github.com/deviantony/docker-elk.git
