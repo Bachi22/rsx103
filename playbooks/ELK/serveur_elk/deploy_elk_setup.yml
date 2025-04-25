@@ -2,12 +2,16 @@
 - name: Setup Docker-ELK stack with custom configs
   hosts: all
   become: yes
+  gather_facts: yes
+
   vars_files:
     - elk_secret.yml
-    - elk_ip.yml
+
+  vars:
+    ip_addr: "{{ ansible_default_ipv4.address }}"
 
   tasks:
-    - name: Afficher la valeur de ip_addr
+    - name: Afficher la valeur de ip_addr détectée automatiquement
       debug:
         msg: "L'adresse IP utilisée est : {{ ip_addr }}"
 
@@ -28,3 +32,13 @@
         src: fleet-compose.yml
         dest: /opt/docker-elk/extensions/fleet/fleet-compose.yml
         mode: '0644'
+
+    # - name: Lancer la commande "docker compose up setup"
+    #   command: docker compose -f /opt/docker-elk/docker-compose.yml up setup
+    #   args:
+    #     chdir: /opt/docker-elk
+    #   register: install_output
+
+    # - name: Afficher la sortie de l'installation
+    #   debug:
+    #     msg: "{{ install_output.stdout }}"
