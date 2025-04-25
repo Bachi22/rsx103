@@ -50,7 +50,7 @@
         msg: "{{ install_output.stdout }}"
 
     - name: Docker-compose up -d -> Lancement kibana
-      command: /opt/docker-elk/docker-compose.yml up -d
+      command: docker-compose /opt/docker-elk/docker-compose.yml up -d
       args:
         chdir: /opt/docker-elk
       register: launch_output
