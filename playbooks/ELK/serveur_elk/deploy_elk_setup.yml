@@ -59,6 +59,10 @@
       debug:
         msg: "{{ launch_output.stdout }}"
 
+    - name: Waiting for launching
+      ansible.builtin.pause:
+        minutes: 3
+
     - name: Docker-compose up -d -> fleet
       command: docker-compose -f /opt/docker-elk/docker-compose.yml -f /opt/docker-elk/extensions/fleet/fleet-compose.yml up -d
       args:
