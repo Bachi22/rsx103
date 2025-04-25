@@ -3,7 +3,7 @@
   hosts: all
   become: yes
   vars_files:
-    - ELK_secret.yml
+    - elk_secret.yml
     - elk_ip.yml
 
   tasks:
