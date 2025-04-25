@@ -1,0 +1,24 @@
+---
+- name: Setup Docker-ELK stack with custom configs
+  hosts: localhost
+  vars_files:
+    - ELK_secret.yml
+
+  tasks:
+    - name: Cloner le dépôt docker-elk
+      git:
+        repo: https://github.com/deviantony/docker-elk.git
+        dest: /opt/docker-elk
+        version: main
+
+    - name: Copier le kibana.yml custom
+      copy:
+        src: kibana.yml.j2
+        dest: /opt/docker-elk/kibana/config/kibana.yml
+        mode: '0644'
+
+    - name: Copier le fleet-compose.yml custom
+      copy:
+        src: fleet-compose.yml
+        dest: /opt/docker-elk/extensions/fleet/fleet-compose.yml
+        mode: '0644'
