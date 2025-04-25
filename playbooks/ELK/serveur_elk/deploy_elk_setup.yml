@@ -19,7 +19,7 @@
 
     - name: Copier le kibana.yml custom
       copy:
-        src: kibana.yml.j2
+        template: kibana.yml.j2
         dest: /opt/docker-elk/kibana/config/kibana.yml
         mode: '0644'
 
