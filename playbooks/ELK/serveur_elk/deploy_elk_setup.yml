@@ -1,6 +1,7 @@
 ---
 - name: Setup Docker-ELK stack with custom configs
-  hosts: localhost
+  hosts: all
+  become: yes
   vars_files:
     - ELK_secret.yml
 
