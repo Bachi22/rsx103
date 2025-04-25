@@ -33,12 +33,22 @@
         dest: /opt/docker-elk/extensions/fleet/fleet-compose.yml
         mode: '0644'
 
-    # - name: Lancer la commande "docker compose up setup"
-    #   command: docker compose -f /opt/docker-elk/docker-compose.yml up setup
-    #   args:
-    #     chdir: /opt/docker-elk
-    #   register: install_output
+    - name: Lancement "Du setup"
+      command: docker-compose -f /opt/docker-elk/docker-compose.yml up setup
+      args:
+        chdir: /opt/docker-elk
+      register: install_output
 
-    # - name: Afficher la sortie de l'installation
-    #   debug:
-    #     msg: "{{ install_output.stdout }}"
+    - name: Afficher la sortie de l'installation
+      debug:
+        msg: "{{ install_output.stdout }}"
+
+    - name: Docker-compose up -d
+      command: docker-compose -f /opt/docker-elk/docker-compose.yml -f /opt/docker-elk/extensions/fleet/fleet-compose.yml up -d
+      args:
+        chdir: /opt/docker-elk
+      register: launch_output
+
+    - name: Afficher la sortie de l'installation
+      debug:
+        msg: "{{ launch_output.stdout }}"
