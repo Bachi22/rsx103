@@ -4,9 +4,8 @@
   # vars_files:
   # - ELK_secret.yml
   vars:
-    enrollment_token: "{{ hostvars['localhost']['enrollment_token'] }}"
-    ip_addr: "192.168.1.71" # ADRESSE IP DU SERVEUR
-    elastic_version: "9.0.0"
+    enrollment_token: "aTVVMWVaWUJ6NDFYclBRRUhVQkE6TjAyS1NjSjloNk5LWF90Z01WVDBmdw=="
+    ip_addr: "10.0.2.2" # ADRESSE IP DU SERVEUR
 
   tasks:
     - name: Download Elastic Agent
@@ -23,7 +22,7 @@
 
     - name: Install Elastic Agent
       ansible.builtin.command:
-        cmd: ./elastic-agent install --fleet-server-es=http://{{ ip_addr }}:9200 --fleet-server-service-token=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE3NDU0MTk5MDY1NTc6NlRycktjUEZTWnFScTNweXNnNE9yZw --fleet-server-policy=fleet-server-policy --fleet-server-port=8220 --install-servers --non-interactive --force
+        cmd: ./elastic-agent install --fleet-server-es=http://{{ ip_addr }}:9200 --fleet-server-service-token={{ enrollment_token }} --fleet-server-policy=fleet-server-policy --fleet-server-port=8220 --install-servers --non-interactive --force
         chdir: /tmp
       register: install_output
       ignore_errors: no  # optionnel, selon le niveau de tolérance que tu veux
