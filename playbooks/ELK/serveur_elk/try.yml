@@ -1,0 +1,28 @@
+---
+- name: Setup Docker-ELK stack with custom configs
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - elk_secret.yml
+
+  tasks:
+    - name: Attendre que Kibana soit prêt
+    uri:
+      url: "http://localhost:5601/api/status"
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 30
+    delay: 10
+    
+  # - name: Initialiser Fleet avec curl
+  #   shell: |
+  #     curl -u elastic:changeme -X POST "http://localhost:5601/api/fleet/setup" \
+  #       -H 'Content-Type: application/json' \
+  #       -H 'kbn-xsrf: true'
+  #   register: fleet_setup_result
+  #   until: fleet_setup_result.rc == 0
+  #   retries: 10
+  #   delay: 5

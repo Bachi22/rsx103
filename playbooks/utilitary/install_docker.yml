@@ -13,16 +13,10 @@
           - gnupg
           - git
           - curl
-          - python3-pip    # <-- Important pour pouvoir utiliser pip !
+          - python3-pip
+          - python3-jmespath 
         state: latest
         update_cache: true
-
-    - name: Install Python package jmespath
-      ansible.builtin.pip:
-        name: jmespath
-        executable: pip3   # <-- pour être sûr d'utiliser pip3
-        state: latest
-        extra_args: --break-system-packages
 
     - name: Add signing key
       ansible.builtin.apt_key:

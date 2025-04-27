@@ -11,6 +11,20 @@
     ip_addr: "{{ ansible_default_ipv4.address }}"
 
   tasks:
+   # DEBUG
+    - name: Nettoyer les anciens conteneurs et volumes
+      shell: |
+          docker rm -f $(docker ps -aq) || true
+          docker volume rm $(docker volume ls -q) || true
+      ignore_errors: true
+
+    - name: Supprimer répertoire LLDAP
+      file:
+        path: "/opt/docker-elk"
+        state: absent
+      ignore_errors: true
+
+   # REAL INSTALL
     - name: Afficher la valeur de ip_addr détectée automatiquement
       debug:
         msg: "L'adresse IP utilisée est : {{ ip_addr }}"
