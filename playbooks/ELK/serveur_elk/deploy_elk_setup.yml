@@ -1,6 +1,6 @@
 ---
 - name: Setup Docker-ELK stack with custom configs
-  hosts: all
+  hosts: localhost
   become: yes
   gather_facts: yes
 

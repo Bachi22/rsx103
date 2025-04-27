@@ -3,6 +3,9 @@
   become: yes
   # vars_files:
   # - ELK_secret.yml
+  vars:
+    enrollment_token: "TOKEN"
+    ip_addr: "IP_SERVEUR" # ADRESSE IP DU SERVEUR
 
   tasks:
     - name: Download Elastic Agent
@@ -19,7 +22,7 @@
 
     - name: Install Elastic Agent
       ansible.builtin.command:
-        cmd: ./elastic-agent-9.0.0-linux-x86_64/elastic-agent install --url=http://192.168.1.46:8220 --enrollment-token=eTJsbVg1WUJyNGVGRmtqS05DMTY6T0ZzYndqVThidzdEQnBON29FdFRUUQ== --insecure --non-interactive --force
+        cmd: ./elastic-agent-9.0.0-linux-x86_64/elastic-agent install --url=http://{{ ip_addr }}:8220 --enrollment-token={{ enrollment_token }} --insecure --non-interactive --force
         chdir: /tmp
       register: install_output
       ignore_errors: no  # optionnel, selon le niveau de tolérance que tu veux

@@ -1,5 +1,5 @@
-- hosts: all
-  name: Install Docker
+- hosts: localhost
+  name: Install Docker + basic packages
   become: yes
   vars:
     docker_group: docker
