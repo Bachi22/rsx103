@@ -7,6 +7,9 @@
   vars_files:
     - elk_secret.yml
 
+  vars:
+    ip_addr: "{{ ansible_default_ipv4.address }}"
+
   tasks:
     - name: Détection d'erreurs système critiques
       shell: >
