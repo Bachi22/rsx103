@@ -11,6 +11,7 @@
           - ca-certificates
           - lsb-release
           - gnupg
+          - git
         state: latest
         update_cache: true
 
