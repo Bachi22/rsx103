@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.1
+    command: start-dev
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME={{ kc_admin_user }}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD={{ kc_admin_pass }}
+      - KC_HOSTNAME=http://{{ domain_auth }}
+      - KC_HOSTNAME_STRICT=false
+      - KC_PROXY=passthrough
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_HTTP_RELATIVE_PATH=/
+      - KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true
+      - KC_HTTP_ENABLED=true
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "9000:9000"
+    networks:
+      - proxy-net
+
+  scribble:
+    image: biosmarcel/scribble.rs:latest
+    environment:
+      - PORT=8080
+    networks:
+      - proxy-net
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - keycloak
+      - scribble
+    ports:
+      - "80:80"
+    networks:
+      - proxy-net
+
+networks:
+  proxy-net:
+    driver: bridge

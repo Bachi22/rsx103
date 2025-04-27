@@ -1,0 +1,122 @@
+- hosts: localhost
+  connection: local
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  collections:
+    - community.docker
+    - community.general
+
+  tasks:
+    - name: Générer docker-compose.yml
+      ansible.builtin.template:
+        src: templates/docker-compose.yml.j2
+        dest: "{{ playbook_dir }}/docker-compose.yml"
+
+    - name: Générer nginx.conf
+      ansible.builtin.template:
+        src: templates/nginx.conf.j2
+        dest: "{{ playbook_dir }}/nginx.conf"
+
+    - name: Arrêter les containers existants
+      ansible.builtin.command:
+        cmd: docker compose down
+        chdir: "{{ playbook_dir }}"
+      ignore_errors: yes
+
+    - name: Démarrer la stack Docker Compose
+      ansible.builtin.command:
+        cmd: docker compose up -d --build
+        chdir: "{{ playbook_dir }}"
+      register: compose_up
+      changed_when: compose_up.rc == 0
+
+    - name: Vérifier que les services sont en ligne
+      ansible.builtin.command:
+        cmd: docker compose ps
+        chdir: "{{ playbook_dir }}"
+      register: compose_ps
+
+    - name: Afficher l'état de Docker Compose
+      ansible.builtin.debug:
+        var: compose_ps.stdout_lines
+
+    - name: Attendre que Keycloak API soit disponible (HTTP 200)
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:8080/realms/master"
+        method: GET
+        status_code: 200
+      register: keycloak_health
+      until: keycloak_health.status == 200
+      retries: 60
+      delay: 5
+
+    - name: Attendre que NGINX (OIDC) écoute sur le port 80
+      ansible.builtin.wait_for:
+        host: "127.0.0.1"
+        port: 80
+        delay: 5
+        timeout: 300
+
+    - name: Créer le realm Keycloak
+      community.general.keycloak_realm:
+        auth_keycloak_url: "{{ keycloak_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ kc_admin_user }}"
+        auth_password: "{{ kc_admin_pass }}"
+        realm: "{{ kc_realm }}"
+        id: "{{ kc_realm }}"
+        state: present
+        enabled: true
+        ssl_required:     none
+
+    - name: Configurer la fédération LDAP dans Keycloak
+      community.general.keycloak_user_federation:
+        auth_keycloak_url: "{{ keycloak_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ kc_admin_user }}"
+        auth_password: "{{ kc_admin_pass }}"
+        realm: "{{ kc_realm }}"
+        name: ldap
+        state: present
+        provider_id: ldap
+        provider_type: org.keycloak.storage.UserStorageProvider
+        config:
+          priority: 0
+          enabled: true
+          cachePolicy: DEFAULT
+          batchSizeForSync: 1000
+          editMode: READ_ONLY
+          importEnabled: true
+          syncRegistrations: false
+          vendor: other
+          usernameLDAPAttribute: uid
+          rdnLDAPAttribute: uid
+          uuidLDAPAttribute: entryUUID
+          userObjectClasses: inetOrgPerson, organizationalPerson
+          connectionUrl: "{{ ldap_url }}"
+          usersDn: "{{ ldap_base_dn }}"
+          authType: simple
+          bindDn: "{{ ldap_bind_dn }}"
+          bindCredential: "{{ ldap_bind_password }}"
+          searchScope: 1
+          pagination: true
+          useTruststoreSpi: ldapsOnly
+
+    - name: Créer le client OIDC pour l'application
+      community.general.keycloak_client:
+        auth_keycloak_url: "{{ keycloak_admin_url }}"
+        auth_realm:    master
+        auth_username: "{{ kc_admin_user }}"
+        auth_password: "{{ kc_admin_pass }}"
+        realm:         "{{ kc_realm }}"       # ← cible le realm myrealm
+        client_id:     "{{ kc_client_id }}"   # e.g. nginx-rp
+        secret:        "{{ kc_client_secret }}"
+        redirect_uris:
+          - "http://{{ domain_app }}/redirect_uri"
+        standard_flow_enabled: true
+        public_client:        false
+        enabled:              true
+        state:                present

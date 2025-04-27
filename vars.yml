@@ -1,0 +1,27 @@
+domain_auth:  auth2k.duckdns.org
+domain_app:   ourservice.duckdns.org
+#domain_auth: keycloak
+keycloak_admin_url: "http://127.0.0.1:8080"
+
+# URL interne de Keycloak pour la découverte OIDC dans Docker
+keycloak_internal_url: "http://keycloak:8080"
+
+# Keycloak (admin)
+kc_realm:       myrealm
+kc_admin_user:  admin
+kc_admin_pass:  admin
+
+# Client OIDC pour NGINX
+kc_client_id:     nginx-rp
+kc_client_secret: nginx-secret
+
+# LDAP
+ldap_url:           "ldap://10.0.3.2:389"
+ldap_base_dn:       "dc=rsx,dc=bzh"
+ldap_bind_dn:       "cn=admin,dc=rsx,dc=bzh"
+ldap_bind_password: "adminpassword"
+
+# Paramètres du cookie de session pour OpenID Connect
+session_cookie_samesite: "Lax"
+session_cookie_secure: false
+session_cookie_domain: ".duckdns.org"

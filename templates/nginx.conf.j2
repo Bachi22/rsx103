@@ -1,0 +1,137 @@
+worker_processes auto;
+events { worker_connections 1024; }
+
+http {
+    # DNS Docker interne et public
+    resolver 127.0.0.11 8.8.8.8 valid=30s;
+    resolver_timeout 5s;
+
+    lua_package_path "/usr/local/share/lua/5.1/?.lua;;";
+    lua_shared_dict discovery 1m;
+    lua_shared_dict sessions 10m;
+
+    server {
+        listen 80;
+        server_name {{ domain_auth }};
+
+        location / {
+            proxy_set_header Host              $host;
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host  $host;
+            proxy_set_header X-Forwarded-Port  $server_port;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_pass http://keycloak:8080;
+        }
+    }
+
+    server {
+        listen       80;
+        server_name  scribbbbble.duckdns.org;
+
+        location / {
+            proxy_set_header Host              $host;
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host  $host;
+            proxy_set_header X-Forwarded-Port  $server_port;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade   $http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+            proxy_pass http://scribble:8080;
+        }
+    }
+
+
+    server {
+        listen 80;
+        server_name {{ domain_app }};
+
+        # Callback OAuth2 (phase 2)
+        location = /redirect_uri {
+            access_by_lua_block {
+                -- Démarrage de la session avec configuration de cookie
+                local session = require("resty.session").start({
+                    cookie = {
+                        samesite = "{{ session_cookie_samesite }}",
+                        secure   = {{ session_cookie_secure }},
+                        domain   = "{{ session_cookie_domain }}"
+                    }
+                })
+
+                local opts = {
+                    discovery     = "{{ keycloak_internal_url }}/realms/{{ kc_realm }}/.well-known/openid-configuration",
+                    client_id     = "{{ kc_client_id }}",
+                    client_secret = "{{ kc_client_secret }}",
+                    redirect_uri  = "http://{{ domain_app }}/redirect_uri",
+                    ssl_verify    = false,
+                    scope         = "openid"
+                }
+                local res, err = require("resty.openidc").authenticate(opts)
+                if err then
+                    ngx.status = 500
+                    ngx.say("Authentication error: ", err)
+                    ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+                end
+                return ngx.redirect("/")
+            }
+        }
+
+        # Phase 1 : protection de toutes les routes
+        location / {
+            access_by_lua_block {
+                local session = require("resty.session").start({
+                    cookie = {
+                        samesite = "{{ session_cookie_samesite }}",
+                        secure   = {{ session_cookie_secure }},
+                        domain   = "{{ session_cookie_domain }}"
+                    }
+                })
+
+                local opts = {
+                    discovery     = "{{ keycloak_internal_url }}/realms/{{ kc_realm }}/.well-known/openid-configuration",
+                    client_id     = "{{ kc_client_id }}",
+                    client_secret = "{{ kc_client_secret }}",
+                    redirect_uri  = "http://{{ domain_app }}/redirect_uri",
+                    ssl_verify    = false,
+                    scope         = "openid"
+                }
+                local res, err = require("resty.openidc").authenticate(opts)
+                if err then
+                    ngx.status = 500
+                    ngx.say("Authentication error: ", err)
+                    ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+                end
+            }
+
+            proxy_set_header Host              $host;
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host  $host;
+            proxy_set_header X-Forwarded-Port  $server_port;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade   $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_pass http://scribble:8080;
+        }
+
+        # Exposition des endpoints Keycloak
+        location /realms/ {
+            proxy_set_header Host              $host;
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Host  $host;
+            proxy_set_header X-Forwarded-Port  $server_port;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            proxy_pass http://keycloak:8080;
+            proxy_http_version 1.1;
+            proxy_redirect http://keycloak:8080/ http://{{ domain_auth }}/;
+        }
+    }
+}
