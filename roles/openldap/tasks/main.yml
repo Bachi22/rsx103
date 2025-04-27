@@ -1,0 +1,61 @@
+# roles/openldap/tasks/main.yml
+
+- name: Ensure openldap image is pulled
+  community.docker.docker_image:
+    name: osixia/openldap:1.5.0
+    source: pull
+
+- name: Remove existing OpenLDAP container (if any)
+  community.docker.docker_container:
+    name: openldap
+    state: absent
+    force_kill: yes
+
+- name: Run openldap container with LDAPS enabled
+  community.docker.docker_container:
+    name: openldap
+    image: osixia/openldap:1.5.0
+    state: started
+    restart_policy: always
+    network_mode: host
+    hostname: ldap.rsx.bzh
+    env:
+      LDAP_ORGANISATION: "rsx.bzh"
+      LDAP_DOMAIN:      "rsx.bzh"
+      LDAP_ADMIN_PASSWORD: "adminpassword"
+
+- name: Wait for LDAP LDAPS service to be available
+  wait_for:
+    host: 127.0.0.1
+    port: 636
+    timeout: 30
+
+- name: Ensure John Doe exists in LDAP (plain LDAP)
+  community.general.ldap_entry:
+    server_uri:   "ldap://127.0.0.1:389"
+    bind_dn:      "cn=admin,dc=rsx,dc=bzh"
+    bind_pw:      "adminpassword"
+    dn:           "uid=jdoe,dc=rsx,dc=bzh"
+    objectClass:
+      - inetOrgPerson
+    attributes:
+      cn:           "John Doe"
+      sn:           "Doe"
+      uid:          "jdoe"
+      userPassword: "password1"
+    validate_certs: no
+
+- name: Ensure Alice Smith exists in LDAP (plain LDAP)
+  community.general.ldap_entry:
+    server_uri:   "ldap://127.0.0.1:389"
+    bind_dn:      "cn=admin,dc=rsx,dc=bzh"
+    bind_pw:      "adminpassword"
+    dn:           "uid=asmith,dc=rsx,dc=bzh"
+    objectClass:
+      - inetOrgPerson
+    attributes:
+      cn:           "Alice Smith"
+      sn:           "Smith"
+      uid:          "asmith"
+      userPassword: "password2"
+    validate_certs: no
