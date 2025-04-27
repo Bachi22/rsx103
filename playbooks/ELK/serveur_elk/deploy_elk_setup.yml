@@ -168,93 +168,56 @@
 
     - name: Détection d'erreurs système critiques
       shell: >
-        curl -k -u elastic:changeme
+        curl -k -u elastic:{{ changeme }}
         -X POST "http://{{ ip_addr }}:5601/api/alerting/rule"
         -H "kbn-xsrf: true"
         -H "Content-Type: application/json"
-        --data '{"params":{"index":["logs-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"bool\":{\"should\":[{\"query_string\":{\"query\":\"message:(\\\"kernel panic\\\" OR \\\"oom-killer\\\" OR \\\"segfault\\\" OR \\\"disk failure\\\")\"}}]}}}","size":100,"threshold":[0],"thresholdComparator":">","timeWindowSize":1,"timeWindowUnit":"m"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"1m"},"name":"Erreur système critique","tags":["système","erreur","critique"],"actions":[]}'
+        --data '{"params":{"index":["logs-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"bool\":{\"should\":[{\"query_string\":{\"query\":\"message:(\\\"kernel panic\\\" OR \\\"oom-killer\\\" OR \\\"segfault\\\" OR \\\"disk failure\\\")\"}}]}}}","size":100,"threshold":[0],"thresholdComparator":">","timeWindowSize":1,"timeWindowUnit":"m"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"1m"},"name":"Erreur système critique détectée","tags":["système","erreur","critique"],"actions":[]}'
 
-    - name: Détection de redémarrages
+    - name: Détection de redémarrages multiples
       shell: >
-        curl -k -u elastic:changeme
+        curl -k -u elastic:{{ changeme }}
         -X POST "http://{{ ip_addr }}:5601/api/alerting/rule"
         -H "kbn-xsrf: true"
         -H "Content-Type: application/json"
-        --data '{"params":{"index":["logs-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"match_phrase\":{\"message\":\"reboot\"}}}","size":100,"threshold":[2],"thresholdComparator":">","timeWindowSize":24,"timeWindowUnit":"h"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"5m"},"name":"Détection de redémarrages","tags":["système","reboot"],"actions":[]}'
+        --data '{"params":{"index":["logs-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"match_phrase\":{\"message\":\"reboot\"}}}","size":100,"threshold":[2],"thresholdComparator":">","timeWindowSize":24,"timeWindowUnit":"h"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"5m"},"name":"Détection de redémarrages multiples","tags":["système","reboot"],"actions":[]}'
 
-    - name: Monitoring de la charge CPU
+    - name: Surveillance de la charge CPU
       shell: >
-        curl -k -u elastic:changeme
+        curl -k -u elastic:{{ changeme }}
         -X POST "http://{{ ip_addr }}:5601/api/alerting/rule"
         -H "kbn-xsrf: true"
         -H "Content-Type: application/json"
-        --data '{"params":{"index":["metrics-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"range\":{\"system.cpu.total.norm.pct\":{\"gte\":0.85}}}}","size":1,"threshold":[0],"thresholdComparator":">","timeWindowSize":5,"timeWindowUnit":"m"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"1m"},"name":"Monitoring de la charge CPU","tags":["performance","cpu"],"actions":[]}'
+        --data '{"params":{"index":["metrics-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"range\":{\"system.cpu.total.norm.pct\":{\"gte\":0.85}}}}","size":1,"threshold":[0],"thresholdComparator":">","timeWindowSize":5,"timeWindowUnit":"m"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"1m"},"name":"Surveillance de la charge CPU","tags":["performance","cpu"],"actions":[]}'
 
-    - name: Monitoring de l'utilisation de la mémoire RAM
+    - name: Surveillance de l'utilisation de la mémoire RAM
       shell: >
-        curl -k -u elastic:changeme
+        curl -k -u elastic:{{ changeme }}
         -X POST "http://{{ ip_addr }}:5601/api/alerting/rule"
         -H "kbn-xsrf: true"
         -H "Content-Type: application/json"
-        --data '{"params":{"index":["metrics-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"range\":{\"system.memory.used.pct\":{\"gte\":0.9}}}}","size":1,"threshold":[0],"thresholdComparator":">","timeWindowSize":5,"timeWindowUnit":"m"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"1m"},"name":"Monitoring de la mémoire RAM","tags":["performance","mémoire"],"actions":[]}'
+        --data '{"params":{"index":["metrics-*"],"timeField":"@timestamp","esQuery":"{\"query\":{\"range\":{\"system.memory.used.pct\":{\"gte\":0.9}}}}","size":1,"threshold":[0],"thresholdComparator":">","timeWindowSize":5,"timeWindowUnit":"m"},"consumer":"alerts","rule_type_id":".es-query","schedule":{"interval":"1m"},"name":"Surveillance de la mémoire RAM","tags":["performance","mémoire"],"actions":[]}'
 
-    - name: Arrêt d'une machine
+    - name: Détection d'une machine arrêtée
       shell: |
-        curl -k -u elastic:changeme \
+        curl -k -u elastic:{{ changeme }} \
           -X POST "http://{{ ip_addr }}:5601/api/alerting/rule" \
           -H "kbn-xsrf: true" \
           -H "Content-Type: application/json" \
-          --data "{\"params\":{\"index\":[\"logs-*\"],\"timeField\":\"@timestamp\",\"esQuery\":\"{\\\"query\\\":{\\\"match_all\\\":{}}}\",\"size\":1,\"threshold\":[0],\"thresholdComparator\":\"<\",\"timeWindowSize\":1,\"timeWindowUnit\":\"m\"},\"consumer\":\"alerts\",\"rule_type_id\":\".es-query\",\"schedule\":{\"interval\":\"1m\"},\"name\":\"Arrêt d'une machine\",\"tags\":[\"système\",\"inactivité\"],\"actions\":[]}"
+          --data "{\"params\":{\"index\":[\"logs-*\"],\"timeField\":\"@timestamp\",\"esQuery\":\"{\\\"query\\\":{\\\"match_all\\\":{}}}\",\"size\":1,\"threshold\":[0],\"thresholdComparator\":\"<\",\"timeWindowSize\":1,\"timeWindowUnit\":\"m\"},\"consumer\":\"alerts\",\"rule_type_id\":\".es-query\",\"schedule\":{\"interval\":\"1m\"},\"name\":\"Détection d'une machine arrêtée\",\"tags\":[\"système\",\"inactivité\"],\"actions\":[]}"
 
-    - name: Monitoring de l'espace disque
+    - name: Surveillance de l'espace disque
       shell: |
-        curl -k -u elastic:changeme \
+        curl -k -u elastic:{{ changeme }} \
           -X POST "http://{{ ip_addr }}:5601/api/alerting/rule" \
           -H "kbn-xsrf: true" \
           -H "Content-Type: application/json" \
-          --data "{\"params\":{\"index\":[\"metrics-*\"],\"timeField\":\"@timestamp\",\"esQuery\":\"{\\\"query\\\":{\\\"range\\\":{\\\"system.filesystem.available.pct\\\":{\\\"lte\\\":0.1}}}}\",\"size\":1,\"threshold\":[0],\"thresholdComparator\":\"<\",\"timeWindowSize\":5,\"timeWindowUnit\":\"m\"},\"consumer\":\"alerts\",\"rule_type_id\":\".es-query\",\"schedule\":{\"interval\":\"1m\"},\"name\":\"Monitoring de l'espace disque\",\"tags\":[\"stockage\",\"disque\"],\"actions\":[]}"
+          --data "{\"params\":{\"index\":[\"metrics-*\"],\"timeField\":\"@timestamp\",\"esQuery\":\"{\\\"query\\\":{\\\"range\\\":{\\\"system.filesystem.available.pct\\\":{\\\"lte\\\":0.1}}}}\",\"size\":1,\"threshold\":[0],\"thresholdComparator\":\"<\",\"timeWindowSize\":5,\"timeWindowUnit\":\"m\"},\"consumer\":\"alerts\",\"rule_type_id\":\".es-query\",\"schedule\":{\"interval\":\"1m\"},\"name\":\"Surveillance de l'espace disque\",\"tags\":[\"stockage\",\"disque\"],\"actions\":[]}"
 
-    - name: Monitoring de l'utilisation du swap
+    - name: Surveillance de l'utilisation du swap
       shell: |
-        curl -k -u elastic:changeme \
+        curl -k -u elastic:{{ changeme }} \
           -X POST "http://{{ ip_addr }}:5601/api/alerting/rule" \
           -H "kbn-xsrf: true" \
           -H "Content-Type: application/json" \
-          --data "{\"params\":{\"index\":[\"metrics-*\"],\"timeField\":\"@timestamp\",\"esQuery\":\"{\\\"query\\\":{\\\"range\\\":{\\\"system.memory.swap.used.pct\\\":{\\\"gte\\\":0.2}}}}\",\"size\":1,\"threshold\":[0],\"thresholdComparator\":\">\",\"timeWindowSize\":5,\"timeWindowUnit\":\"m\"},\"consumer\":\"alerts\",\"rule_type_id\":\".es-query\",\"schedule\":{\"interval\":\"1m\"},\"name\":\"Monitoring de l'utilisation du swap\",\"tags\":[\"mémoire\",\"swap\"],\"actions\":[]}"
-
-- name: Installer l'agent Elastic sur machine distante
-  hosts: all
-  become: yes
-  vars:
-    enrollment_token: "{{ hostvars['localhost']['enrollment_token'] }}"
-    elastic_version: "9.0.0"
-    ip_addr: 192.168.1.71
-
-  tasks:
-    - name: Installer curl et unzip
-      apt:
-        name: [curl, unzip]
-        state: present
-        update_cache: yes
-
-    - name: Télécharger l'agent Elastic
-      get_url:
-        url: "https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-{{ elastic_version }}-linux-x86_64.tar.gz"
-        dest: /tmp/elastic-agent.tar.gz
-
-    - name: Extraire l'archive
-      unarchive:
-        src: /tmp/elastic-agent.tar.gz
-        dest: /opt/
-        remote_src: yes
-
-    - name: Enroll l'agent dans Fleet
-      shell: |
-        cd /opt/elastic-agent-{{ elastic_version }}-linux-x86_64
-        ./elastic-agent install \
-          --url=http://{{ ip_addr }}:8220 \
-          --enrollment-token={{ enrollment_token }} \
-          --insecure \
-          --force
-      args:
-        creates: /opt/Elastic/Agent
+          --data "{\"params\":{\"index\":[\"metrics-*\"],\"timeField\":\"@timestamp\",\"esQuery\":\"{\\\"query\\\":{\\\"range\\\":{\\\"system.memory.swap.used.pct\\\":{\\\"gte\\\":0.2}}}}\",\"size\":1,\"threshold\":[0],\"thresholdComparator\":\">\",\"timeWindowSize\":5,\"timeWindowUnit\":\"m\"},\"consumer\":\"alerts\",\"rule_type_id\":\".es-query\",\"schedule\":{\"interval\":\"1m\"},\"name\":\"Surveillance de l'utilisation du swap\",\"tags\":[\"mémoire\",\"swap\"],\"actions\":[]}"
