@@ -12,6 +12,7 @@
           - lsb-release
           - gnupg
           - git
+          - curl
         state: latest
         update_cache: true
 
