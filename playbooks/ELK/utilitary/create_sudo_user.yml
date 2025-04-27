@@ -5,14 +5,14 @@
   tasks:
     - name: Create a new user
       user:
-        name: username  # Replace with desired username
+        name: ansible_user  # Replace with desired username
         password: "{{ 'your_password' | password_hash('sha512') }}"  # Replace 'your_password' with the actual password
         shell: /bin/bash
         state: present
 
     - name: Add user to sudo group
       user:
-        name: username  # Replace with the same username
+        name: ansible_user  # Replace with the same username
         groups: sudo
         append: yes
 
@@ -20,6 +20,6 @@
       lineinfile:
         path: /etc/sudoers
         state: present
-        regexp: '^username'
-        line: 'username ALL=(ALL) NOPASSWD:ALL'
+        regexp: '^ansible_user'
+        line: 'ansible_user ALL=(ALL) NOPASSWD:ALL'
         validate: '/usr/sbin/visudo -cf %s'
