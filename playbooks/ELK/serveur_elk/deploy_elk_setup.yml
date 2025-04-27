@@ -111,7 +111,7 @@
 
     - name: Initialiser Fleet avec curl
       shell: |
-        curl -u elastic:{{changeme}} -X POST "http://localhost:5601/api/fleet/setup" \
+        curl -u elastic:{{ changeme }} -X POST "http://localhost:5601/api/fleet/setup" \
           -H 'Content-Type: application/json' \
           -H 'kbn-xsrf: true'
       register: fleet_setup_result
@@ -122,7 +122,7 @@
     - name: Créer une policy Fleet Server avec curl
       shell: |
         curl -s -X POST "http://localhost:5601/api/fleet/agent_policies" \
-          -u elastic:{{changeme}}  \
+          -u elastic:{{ changeme }}  \
           -H 'Content-Type: application/json' \
           -H 'kbn-xsrf: true' \
           -d '{
@@ -135,7 +135,7 @@
 
     - name: Récupérer toutes les policies Fleet existantes
       shell: |
-        curl -s -u elastic:{{changeme}}  -X GET "http://localhost:5601/api/fleet/agent_policies" -H 'kbn-xsrf: true'
+        curl -s -u elastic:{{ changeme }}  -X GET "http://localhost:5601/api/fleet/agent_policies" -H 'kbn-xsrf: true'
       register: all_policies_response
       args:
         executable: /bin/bash
@@ -146,7 +146,7 @@
 
     - name: Créer un enrollment token pour Agent Policy APM Server
       shell: |
-        curl -u elastic:{{changeme}}  -X POST "http://localhost:5601/api/fleet/enrollment_api_keys" \
+        curl -u elastic:{{ changeme }}  -X POST "http://localhost:5601/api/fleet/enrollment_api_keys" \
           -H 'kbn-xsrf: true' \
           -H 'Content-Type: application/json' \
           -d '{
