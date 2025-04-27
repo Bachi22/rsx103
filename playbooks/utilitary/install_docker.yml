@@ -4,7 +4,7 @@
   vars:
     docker_group: docker
   tasks:
-    - name: Install apt-transport-https
+    - name: Install basic packages
       ansible.builtin.apt:
         name:
           - apt-transport-https
@@ -13,9 +13,15 @@
           - gnupg
           - git
           - curl
-          - jmespath
+          - python3-pip    # <-- Important pour pouvoir utiliser pip !
         state: latest
         update_cache: true
+
+    - name: Install Python package jmespath
+      ansible.builtin.pip:
+        name: jmespath
+        executable: pip3   # <-- pour être sûr d'utiliser pip3
+        state: latest
 
     - name: Add signing key
       ansible.builtin.apt_key:
