@@ -22,6 +22,7 @@
         name: jmespath
         executable: pip3   # <-- pour être sûr d'utiliser pip3
         state: latest
+        extra_args: --break-system-packages
 
     - name: Add signing key
       ansible.builtin.apt_key:
