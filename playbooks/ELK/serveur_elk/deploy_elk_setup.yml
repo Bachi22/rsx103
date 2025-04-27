@@ -12,6 +12,11 @@
 
   tasks:
    # DEBUG
+
+    - name: Définir l'adresse IP principale après collecte des facts
+      set_fact:
+        ip_addr: "{{ ansible_default_ipv4.address }}"
+
     - name: Nettoyer les anciens conteneurs et volumes
       shell: |
           docker rm -f $(docker ps -aq) || true
@@ -223,6 +228,7 @@
   vars:
     enrollment_token: "{{ hostvars['localhost']['enrollment_token'] }}"
     elastic_version: "9.0.0"
+    ip_addr: 192.168.1.71
 
   tasks:
     - name: Installer curl et unzip
