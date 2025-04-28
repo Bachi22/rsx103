@@ -22,7 +22,7 @@
 
     - name: Install Elastic Agent
       ansible.builtin.command:
-        cmd: ./elastic-agent install --fleet-server-es=http://{{ ip_addr }}:9200 --fleet-server-service-token={{ enrollment_token }} --fleet-server-policy=fleet-server-policy --fleet-server-port=8220 --install-servers --non-interactive --force
+        cmd: ./elastic-agent-9.0.0-linux-x86_64/elastic-agent install --fleet-server-es=http://{{ ip_addr }}:9200 --fleet-server-service-token={{ enrollment_token }} --fleet-server-policy=fleet-server-policy --fleet-server-port=8220 --install-servers --non-interactive --force
         chdir: /tmp
       register: install_output
       ignore_errors: no  # optionnel, selon le niveau de tolérance que tu veux
