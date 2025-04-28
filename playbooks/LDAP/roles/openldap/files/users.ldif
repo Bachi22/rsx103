@@ -1,0 +1,13 @@
+dn: uid=jdoe,dc=rsx,dc=bzh
+objectClass: inetOrgPerson
+cn: John Doe
+sn: Doe
+uid: jdoe
+userPassword: password1
+
+dn: uid=asmith,dc=rsx,dc=bzh
+objectClass: inetOrgPerson
+cn: Alice Smith
+sn: Smith
+uid: asmith
+userPassword: password2

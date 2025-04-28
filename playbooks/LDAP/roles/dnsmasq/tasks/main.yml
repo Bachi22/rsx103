@@ -1,0 +1,15 @@
+---
+- name: Ensure dnsmasq image is pulled
+  community.docker.docker_image:
+    name: andyshinn/dnsmasq
+    source: pull
+
+- name: Run dnsmasq container
+  community.docker.docker_container:
+    name: dnsmasq
+    image: andyshinn/dnsmasq
+    state: started
+    restart_policy: always
+    network_mode: host
+    volumes:
+      - "{{ playbook_dir }}/roles/dnsmasq/files/dnsmasq.conf:/etc/dnsmasq.conf:ro"
