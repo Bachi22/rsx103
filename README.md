@@ -66,7 +66,3 @@ ansible-vault create vault.yml                                              # ch
 ansible-vault encrypt vault.yml                                             # chiffrer un fichier
 ansible-playbook -i inventory.ini -l VM_test playbooks/playbook_test.yml    # Utiliser le playbook sur une machine spécifique
 ```
-
-## ISSUE
-
-Y'a moy qu'il y ait un problème avec la clé écrite en dur mais tqt
